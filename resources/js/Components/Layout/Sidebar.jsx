@@ -1,7 +1,3 @@
-// resources/js/Components/Layout/Sidebar.jsx
-import React from "react";
-import { NavLink } from "react-router-dom";
-
 const NAV_ITEMS = [
     { key: "home", label: "Home", icon: "🏠", href: "/" },
     { key: "contacts", label: "Contacts List", icon: "👤", href: "/contacts" },
@@ -17,6 +13,8 @@ const NAV_ITEMS = [
         icon: "📄",
         href: "/opportunities",
     },
+
+    // keep these even if pages aren't built yet
     { key: "stages", label: "Opportunity Stages", icon: "📊", href: "/stages" },
     {
         key: "pipeline",
@@ -24,11 +22,16 @@ const NAV_ITEMS = [
         icon: "📈",
         href: "/pipeline",
     },
+
+    // recommend kebab-case in Laravel routes:
     { key: "import", label: "CSV Import", icon: "⬆️", href: "/csv-import" },
     { key: "search", label: "Global Search", icon: "🔎", href: "/search" },
 ];
 
-export default function Sidebar({ open, onToggle, onNavigate }) {
+export default function Sidebar({ open, onToggle }) {
+    const pathname =
+        typeof window !== "undefined" ? window.location.pathname : "/";
+
     return (
         <aside className={`sidebar ${open ? "open" : "closed"}`}>
             <div className="sidebarTop">
@@ -43,22 +46,20 @@ export default function Sidebar({ open, onToggle, onNavigate }) {
             </div>
 
             <nav className="sidebarNav">
-                {NAV_ITEMS.map((item) => (
-                    <NavLink
-                        key={item.key}
-                        to={item.href}
-                        className={({ isActive }) =>
-                            `navRow ${isActive ? "active" : ""}`
-                        }
-                        onClick={() => {
-                            // Close sidebar after navigation on mobile
-                            if (typeof onNavigate === "function") onNavigate();
-                        }}
-                    >
-                        <span className="navIcon">{item.icon}</span>
-                        <span className="navText">{item.label}</span>
-                    </NavLink>
-                ))}
+                {NAV_ITEMS.map((item) => {
+                    const active = pathname === item.href;
+
+                    return (
+                        <a
+                            key={item.key}
+                            href={item.href}
+                            className={`navRow ${active ? "active" : ""}`}
+                        >
+                            <span className="navIcon">{item.icon}</span>
+                            <span className="navText">{item.label}</span>
+                        </a>
+                    );
+                })}
             </nav>
         </aside>
     );

@@ -1,14 +1,4 @@
-import "../css/app.css";
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-import AppShell from "./Components/Layout/AppShell";
-import Dashboard from "./Pages/Dashboard";
-//import Contact from "./Pages/Contact";
-//import Opportunity from "./Pages/Opportunity";
-import CsvImportPage from "./Pages/CsvImportPage";
-//import NotFound from "./Pages/NotFound";
+app.jsx
 
 import ContactsListPage from "./pages/ContactsListPage";
 import ContactDetailPage from "./pages/ContactDetailPage";

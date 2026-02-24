@@ -1,22 +1,7 @@
-// resources/js/Components/Layout/Header.jsx
-import React from "react";
-
-export default function Header({ user, onMenu }) {
+export default function Header({ user }) {
     return (
         <header className="appHeader">
-            <div className="headerLeft">
-                <button
-                    type="button"
-                    className="mobileMenuBtn"
-                    onClick={onMenu}
-                    aria-label="Open menu"
-                    title="Menu"
-                >
-                    ☰
-                </button>
-
-                <img src="/logo.png" className="brandLogo" alt="CLaaS 2SaaS" />
-            </div>
+            <img src="/logo.png" className="brandLogo" alt="CLaaS 2SaaS" />
 
             <div className="userProfile">
                 <div className="avatarCircle">
