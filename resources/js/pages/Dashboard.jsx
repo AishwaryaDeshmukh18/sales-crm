@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 
 // ==================== HELPER FUNCTIONS ====================
@@ -163,7 +164,6 @@ function TabBtn({ label, active, onClick, count }) {
             className={`tab-btn ${active ? 'active' : ''}`}
         >
             {label}
-            {count !== undefined && <span className="tab-count">{count}</span>}
         </button>
     );
 }
@@ -457,7 +457,7 @@ export default function Dashboard() {
         <div className="dashboard-container">
             {/* Stats Card */}
             <div className="stats-card">
-                <h1>SOP Control Center</h1>
+                <h1>Control Center</h1>
                 <div className="stats-grid">
                     {loading ? (
                         Array(5).fill(0).map((_, i) => <StatCardSkeleton key={i} />)
@@ -479,8 +479,10 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <h2>SLA / SOP Exceptions</h2>
                         {!loading && !error && (
-                            <span className={`exceptions-total ${counts[filter] > 0 ? 'exceptions-total--alert' : 'exceptions-total--ok'}`}>
-                                {counts[filter]} total
+                            <span className={`exceptions-total ${filtered.length > 0 ? 'exceptions-total--alert' : 'exceptions-total--ok'}`}>
+                                {filter === 'All'
+                                    ? `${exceptions.length} total`
+                                    : `${filtered.length} ${filter.toLowerCase()}${filtered.length !== 1 ? 's' : ''}`}
                             </span>
                         )}
                     </div>
