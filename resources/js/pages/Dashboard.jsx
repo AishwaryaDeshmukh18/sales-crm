@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 
-// Helper functions for data transformation
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Determine SLA status based on due date and task status
+ */
 const determineSlaStatus = (dueDate, status) => {
     const now = new Date();
     const due = new Date(dueDate);
@@ -12,6 +16,9 @@ const determineSlaStatus = (dueDate, status) => {
     return 'Active';
 };
 
+/**
+ * Format exception type with time remaining/overdue
+ */
 const formatExceptionType = (taskType, dueDate) => {
     const due = new Date(dueDate);
     const now = new Date();
@@ -27,6 +34,9 @@ const formatExceptionType = (taskType, dueDate) => {
     return `${taskType} (${daysDiff}d left)`;
 };
 
+/**
+ * Get action button text based on task type
+ */
 const getActionText = (taskType) => {
     const actionMap = {
         'Not Verified': 'Verify Now',
@@ -46,6 +56,65 @@ const getActionText = (taskType) => {
     return actionMap[taskType] || 'Take Action';
 };
 
+/**
+ * Safe JSON parser with error handling and logging
+ */
+const safeJsonParse = async (response, endpointName) => {
+    // Get raw text
+    const text = await response.text();
+    
+    // Log for debugging (truncated)
+    console.log(`📡 ${endpointName} raw response (first 200 chars):`, text.substring(0, 200));
+    console.log(`📋 ${endpointName} content-type:`, response.headers.get('content-type'));
+    console.log(`📋 ${endpointName} status:`, response.status);
+    
+    // Check if empty
+    if (!text || text.trim() === '') {
+        throw new Error(`${endpointName} returned empty response`);
+    }
+    
+    // Check if HTML (error page)
+    if (text.trim().startsWith('<')) {
+        console.error(`🔥 ${endpointName} returned HTML:`, text.substring(0, 500));
+        
+        // Try to extract error message from HTML
+        const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+        const bodyMatch = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        
+        if (titleMatch) {
+            throw new Error(`Server error: ${titleMatch[1]}`);
+        }
+        throw new Error(`${endpointName} returned HTML instead of JSON (Status: ${response.status})`);
+    }
+    
+    // Try to parse JSON
+    try {
+        return JSON.parse(text);
+    } catch (parseError) {
+        console.error(`🔥 ${endpointName} JSON parse error:`, parseError);
+        console.error(`🔥 First 100 chars:`, text.substring(0, 100));
+        
+        // Try to extract JSON if there's extra content (debug output before/after)
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                const extracted = JSON.parse(jsonMatch[0]);
+                console.warn(`⚠️ ${endpointName} extracted JSON from mixed content`);
+                return extracted;
+            } catch (e) {
+                // If extraction fails, continue to throw
+            }
+        }
+        
+        throw new Error(`${endpointName} returned invalid JSON: ${text.substring(0, 50)}...`);
+    }
+};
+
+// ==================== SUB-COMPONENTS ====================
+
+/**
+ * Status badge component
+ */
 function StatusBadge({ status }) {
     const statusClass = status === 'Breached' ? 'breached' : 
                         status === 'Due Soon' ? 'due-soon' : 'active';
@@ -57,6 +126,9 @@ function StatusBadge({ status }) {
     );
 }
 
+/**
+ * Button component
+ */
 function Btn({ label, variant='primary', onClick, disabled = false }) {
     return (
         <button 
@@ -69,6 +141,9 @@ function Btn({ label, variant='primary', onClick, disabled = false }) {
     );
 }
 
+/**
+ * Stat card component
+ */
 function StatCard({ label, value }) {
     return (
         <div className="stat-item">
@@ -78,6 +153,9 @@ function StatCard({ label, value }) {
     );
 }
 
+/**
+ * Tab button component
+ */
 function TabBtn({ label, active, onClick, count }) {
     return (
         <button 
@@ -85,11 +163,16 @@ function TabBtn({ label, active, onClick, count }) {
             className={`tab-btn ${active ? 'active' : ''}`}
         >
             {label}
+            {count !== undefined && <span className="tab-count">{count}</span>}
         </button>
     );
 }
 
-// Skeleton Components
+// ==================== SKELETON COMPONENTS ====================
+
+/**
+ * Skeleton loading animation
+ */
 function Skeleton({ width = '100%', height = 16, radius = 6 }) {
     return (
         <div 
@@ -103,6 +186,9 @@ function Skeleton({ width = '100%', height = 16, radius = 6 }) {
     );
 }
 
+/**
+ * Stat card skeleton
+ */
 function StatCardSkeleton() {
     return (
         <div className="stat-item stat-item-skeleton">
@@ -112,6 +198,9 @@ function StatCardSkeleton() {
     );
 }
 
+/**
+ * Table row skeleton
+ */
 function SkeletonRow() {
     return (
         <tr style={{ borderBottom: '1px solid var(--brand-bg)' }}>
@@ -132,6 +221,9 @@ function SkeletonRow() {
     );
 }
 
+/**
+ * Empty state component
+ */
 function EmptyState({ filtered }) {
     return (
         <tr>
@@ -152,15 +244,23 @@ function EmptyState({ filtered }) {
     );
 }
 
-function ErrorState({ onRetry }) {
+/**
+ * Error state component
+ */
+function ErrorState({ onRetry, errorMessage }) {
     return (
         <tr>
             <td colSpan={5}>
                 <div className="empty-state">
                     <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
-                    <p style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, color: '#475569' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#475569' }}>
                         Failed to load data
                     </p>
+                    {errorMessage && (
+                        <p style={{ margin: '0 0 12px', fontSize: 12, color: '#ef4444', maxWidth: 400 }}>
+                            {errorMessage}
+                        </p>
+                    )}
                     <button onClick={onRetry} className="btn btn-primary">
                         Try Again
                     </button>
@@ -170,54 +270,91 @@ function ErrorState({ onRetry }) {
     );
 }
 
+// ==================== MAIN COMPONENT ====================
+
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [exceptions, setExceptions] = useState([]);
     const [filter, setFilter] = useState('All');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [actioningId, setActioningId] = useState(null);
 
+    /**
+     * Fetch all dashboard data
+     */
     const fetchData = async () => {
         setLoading(true);
         setError(false);
+        setErrorMessage('');
 
         try {
-            // Fetch stats
-            const statsResponse = await fetch('/api/dashboard/stats');
-            if (!statsResponse.ok) throw new Error('Failed to fetch stats');
-            const statsData = await statsResponse.json();
+            // ========== FETCH STATS ==========
+            console.log('🚀 Fetching stats from /api/dashboard/stats');
+            
+            const statsResponse = await fetch('/api/dashboard/stats', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                cache: 'no-cache'
+            });
 
-            // Fetch exceptions
-            const exceptionsResponse = await fetch('/api/dashboard/exceptions');
-            if (!exceptionsResponse.ok) throw new Error('Failed to fetch exceptions');
-            const exceptionsData = await exceptionsResponse.json();
+            if (!statsResponse.ok) {
+                throw new Error(`Stats API returned ${statsResponse.status}: ${statsResponse.statusText}`);
+            }
 
+            const statsData = await safeJsonParse(statsResponse, 'Stats API');
+            console.log('✅ Stats data received:', statsData);
+
+            // ========== FETCH EXCEPTIONS ==========
+            console.log('🚀 Fetching exceptions from /api/dashboard/exceptions');
+            
+            const exceptionsResponse = await fetch('/api/dashboard/exceptions', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                cache: 'no-cache'
+            });
+
+            if (!exceptionsResponse.ok) {
+                throw new Error(`Exceptions API returned ${exceptionsResponse.status}: ${exceptionsResponse.statusText}`);
+            }
+
+            const exceptionsData = await safeJsonParse(exceptionsResponse, 'Exceptions API');
+            console.log('✅ Exceptions data received:', exceptionsData);
+
+            // ========== PROCESS DATA ==========
+            
             // Process exceptions to add computed fields for display
-            const processedExceptions = exceptionsData.map(ex => {
+            const processedExceptions = (exceptionsData || []).map(ex => {
                 // Build lead name from contact profile
                 const leadName = ex.contact_profile ? 
-                    `${ex.contact_profile.first_name || ''} ${ex.contact_profile.last_name || ''}`.trim() : 
+                    `${ex.contact_profile.first_name || ''} ${ex.contact_profile.last_name || ''}`.trim() || 'Unknown' : 
                     'Unknown';
                 
                 // Build reference from deal profile
                 const ref = ex.deal_profile?.id ? 
                     `Deal #${ex.deal_profile.id}` : 
-                    'Unknown';
+                    (ex.contact_profile?.id ? `Contact #${ex.contact_profile.id}` : 'Unknown');
                 
                 // Build owner name from employee and BU
                 const owner = ex.employee_ref ? 
-                    `${ex.employee_ref.name || ''} - ${ex.bu_ref?.code || ''}`.trim() : 
+                    `${ex.employee_ref.name || ''} - ${ex.bu_ref?.code || ''}`.trim() || 'Unassigned' : 
                     'Unassigned';
 
                 return {
-                    id: ex.id,
+                    id: ex.id || `temp-${Math.random()}`,
                     lead_name: leadName,
                     ref: ref,
-                    exception_type: formatExceptionType(ex.task_type, ex.due_date),
-                    sla_status: determineSlaStatus(ex.due_date, ex.status),
+                    exception_type: formatExceptionType(ex.task_type || 'Task', ex.due_date || new Date()),
+                    sla_status: determineSlaStatus(ex.due_date || new Date(), ex.status || 'Open'),
                     owner: owner,
-                    action: getActionText(ex.task_type),
+                    action: getActionText(ex.task_type || 'Manual'),
                     // Keep original data for action handling
                     task_id: ex.id,
                     task_type: ex.task_type,
@@ -226,13 +363,20 @@ export default function Dashboard() {
                 };
             });
 
-            setStats(statsData);
+            setStats(statsData || {});
             setExceptions(processedExceptions);
             setLoading(false);
+            
         } catch (err) {
-            console.error('Error fetching data:', err);
+            console.error('🔥 Error fetching data:', err);
             setError(true);
+            setErrorMessage(err.message);
             setLoading(false);
+            
+            // Log to monitoring service if available
+            if (window.errorTracker) {
+                window.errorTracker.captureException(err);
+            }
         }
     };
 
@@ -240,26 +384,45 @@ export default function Dashboard() {
         fetchData();
     }, []);
 
+    // Filter exceptions based on selected tab
     const filtered = filter === 'All' 
         ? exceptions 
         : exceptions.filter(e => e.sla_status === filter);
 
+    // Calculate counts for each status
     const counts = {
         All: exceptions.length,
         Breached: exceptions.filter(e => e.sla_status === 'Breached').length,
         'Due Soon': exceptions.filter(e => e.sla_status === 'Due Soon').length,
     };
 
+    /**
+     * Handle open button click - navigate to deal detail
+     */
     const handleOpen = (row) => {
-        // Navigate to deal detail page
-        // Replace this with actual navigation for details page 
-        window.open(`/deals/${row.deal_id}`, '_blank');
+        if (row.deal_id) {
+            window.open(`/deals/${row.deal_id}`, '_blank');
+        } else if (row.contact_id) {
+            window.open(`/contacts/${row.contact_id}`, '_blank');
+        } else {
+            alert('No associated deal or contact found');
+        }
     };
 
+    /**
+     * Handle action button click - perform task action
+     */
     const handleAction = async (row) => {
+        if (!row.task_id) {
+            alert('No task ID available');
+            return;
+        }
+        
         setActioningId(row.id);
         
         try {
+            console.log(`🔄 Performing action for task ${row.task_id}: ${row.action}`);
+            
             const response = await fetch(`/api/follow-up-tasks/${row.task_id}/action`, {
                 method: 'POST',
                 headers: {
@@ -271,14 +434,20 @@ export default function Dashboard() {
                 }),
             });
 
-            if (!response.ok) throw new Error('Failed to perform action');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Action failed: ${response.status} - ${errorText}`);
+            }
+            
+            const result = await safeJsonParse(response, 'Action API');
+            console.log('✅ Action completed:', result);
             
             // Refresh data after successful action
             await fetchData();
             
         } catch (err) {
-            console.error('Error performing action:', err);
-            alert('Failed to perform action. Please try again.');
+            console.error('🔥 Error performing action:', err);
+            alert(`Failed to perform action: ${err.message}`);
         } finally {
             setActioningId(null);
         }
@@ -352,7 +521,7 @@ export default function Dashboard() {
                             {loading && Array(4).fill(0).map((_, i) => <SkeletonRow key={i} />)}
 
                             {/* Error state */}
-                            {!loading && error && <ErrorState onRetry={fetchData} />}
+                            {!loading && error && <ErrorState onRetry={fetchData} errorMessage={errorMessage} />}
 
                             {/* Empty states */}
                             {!loading && !error && exceptions.length === 0 && <EmptyState filtered={false} />}

@@ -1,9 +1,14 @@
-app.jsx
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AppShell from "./Components/Layout/AppShell";
+import Dashboard from "./Pages/Dashboard";
 
-import ContactsListPage from "./pages/ContactsListPage";
-import ContactDetailPage from "./pages/ContactDetailPage";
-import CompanyListPage from "./pages/CompanyListPage";
-import CompanyDetailPage from "./pages/CompanyDetailPage";
+
+// import ContactsListPage from "./pages/ContactsListPage";
+// import ContactDetailPage from "./pages/ContactDetailPage";
+// import CompanyListPage from "./pages/CompanyListPage";
+// import CompanyDetailPage from "./pages/CompanyDetailPage";
 
 function HomePage() {
     return <div>Home</div>;
@@ -18,9 +23,9 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route element={<AppShell />}>
-                    <Route path="/" element={<HomePage />} />
+                    <Route path="/" element={<Dashboard />} />
 
-                    <Route path="/contacts" element={<ContactsListPage />} />
+                    {/* <Route path="/contacts" element={<ContactsListPage />} />
                     <Route
                         path="/contacts/:id"
                         element={<ContactDetailPage />}
@@ -43,17 +48,17 @@ function App() {
                     <Route
                         path="/pipeline"
                         element={<Placeholder title="Pipeline" />}
-                    />
+                    /> */}
                     <Route
                         path="/csv-import"
                         element={<Placeholder title="CSV Import" />}
                     />
-                    <Route
+                    {/* <Route
                         path="/search"
                         element={<Placeholder title="Global Search" />}
                     />
 
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<Navigate to="/" replace />} /> */}
                 </Route>
             </Routes>
         </BrowserRouter>
@@ -61,3 +66,4 @@ function App() {
 }
 
 createRoot(document.getElementById("app")).render(<App />);
+
