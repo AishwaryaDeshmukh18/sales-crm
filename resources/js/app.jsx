@@ -5,21 +5,20 @@ import AppShell from "./Components/Layout/AppShell";
 import Dashboard from "./Pages/Dashboard";
 
 import Contact from "./Pages/ContactListPage";
-//import Opportunity from "./Pages/Opportunity";
 import CsvImportPage from "./Pages/CsvImportPage";
 import Companies from "./Pages/CompanyListPage";
-//import NotFound from "./Pages/NotFound";
+import GlobalSearch from "./Pages/GlobalSearch"; // ✅ ADD THIS
 
 function App() {
     return (
         <BrowserRouter>
             <AppShell>
                 <Routes>
-                    <Route path="/"               element={<Dashboard />}       />
-                    <Route path="/contacts"       element={<Contact />}   />
-                    <Route path="/companies"  element={<Companies />} />
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/contacts" element={<Contact />} />
+                    <Route path="/companies" element={<Companies />} />
                     <Route path="/csv-import" element={<CsvImportPage />} />
-                    {/* <Route path="*" element={<NotFound />} /> */}
+                    <Route path="/search" element={<GlobalSearch />} /> {/* ✅ ADD THIS */}
                 </Routes>
             </AppShell>
         </BrowserRouter>
@@ -27,4 +26,3 @@ function App() {
 }
 
 createRoot(document.getElementById("app")).render(<App />);
-

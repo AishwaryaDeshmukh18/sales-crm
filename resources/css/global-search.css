@@ -1,0 +1,302 @@
+/* --------------------------------------------------
+   COLOR SYSTEM (STRICT)
+   -------------------------------------------------- */
+:root {
+  --platinum-beige: #F2EFEA;
+  --midnight-blue: #1F2A44;
+  --white: #FFFFFF;
+  --border-light: #E3E3E3;
+
+  --badge-hot-bg: #FEE2E2;
+  --badge-hot-text: #DC2626;
+
+  --badge-warm-bg: #FEF3C7;
+  --badge-warm-text: #F59E0B;
+
+  --badge-cold-bg: #DCFCE7;
+  --badge-cold-text: #16A34A;
+
+  --light-gray-bg: #E9ECEF;
+  --filter-gray-bg: #F3F4F6;
+  --avocado-green: #5C8A2D;
+  --avocado-green-hover: #4E7525;
+  --muted-text: #6B7280;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--midnight-blue);
+  background: #F2EFEA;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------
+   PAGE STRUCTURE (beige frame around white panel)
+   -------------------------------------------------- */
+.main-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  background: #FFFFFF;
+  padding: 24px 32px 32px 32px;
+  border-radius: 12px;
+}
+
+/* --------------------------------------------------
+   HEADER ROW
+   -------------------------------------------------- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--midnight-blue);
+}
+
+/* --------------------------------------------------
+   TOGGLE GROUP (RIGHT SIDE)
+   -------------------------------------------------- */
+.type-toggle {
+  display: flex;
+  background: var(--light-gray-bg);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.type-toggle button {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--midnight-blue);
+  padding: 6px 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.type-toggle button.active {
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  color: var(--midnight-blue);
+}
+
+/* --------------------------------------------------
+   SEARCH + FILTER ROW
+   -------------------------------------------------- */
+.search-filter-row {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar-wrap {
+  position: relative;
+}
+
+.search-bar-wrap input {
+  width: 300px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  padding-left: 14px;
+  padding-right: 36px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar-wrap input::placeholder {
+  color: var(--muted-text);
+}
+
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--muted-text);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------
+   BUSINESS UNIT FILTERS (RIGHT SIDE)
+   -------------------------------------------------- */
+.bu-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.bu-buttons button {
+  background: var(--filter-gray-bg);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--midnight-blue);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.bu-buttons button:hover {
+  background: #E5E7EB;
+  color: var(--midnight-blue);
+}
+
+.bu-buttons button.selected {
+  background: #DDE3EA;
+  color: var(--midnight-blue);
+}
+
+/* --------------------------------------------------
+   RESULT CARDS
+   -------------------------------------------------- */
+.result-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-list.empty {
+  margin-top: 16px;
+  padding: 32px;
+  text-align: center;
+  color: var(--muted-text);
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+}
+
+.result-card {
+  margin-top: 16px;
+  padding: 18px 22px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FFFFFF;
+}
+
+.result-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.result-card-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--midnight-blue);
+}
+
+.result-card-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Status badge: red (hot), yellow (warm), green (cold) – production */
+.status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+/* HOT */
+.status-badge.hot {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+/* WARM */
+.status-badge.warm {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+/* COLD */
+.status-badge.cold {
+  background: #DCFCE7;
+  color: #16A34A;
+}
+
+.pill {
+  background: #F3F4F6;
+  border-radius: 16px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--muted-text);
+}
+
+.result-card-right {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------
+   CTA BUTTON (RIGHT SIDE)
+   -------------------------------------------------- */
+.cta-button {
+  background: var(--avocado-green);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.cta-button:hover {
+  background: var(--avocado-green-hover);
+}
+
+/* --------------------------------------------------
+   CASCADE: Beat user-agent / external stylesheet overrides.
+   Hex value used so nothing can intercept the variable.
+   -------------------------------------------------- */
+.main-container .app-header h1,
+.main-container .type-toggle button,
+.main-container .type-toggle button.active,
+.main-container .bu-buttons button,
+.main-container .bu-buttons button:hover,
+.main-container .bu-buttons button.selected {
+  color: #1F2A44;
+}
+
+/* Final override when something else (e.g. UA, font CSS) forces black */
+.app-header h1,
+.type-toggle button,
+.type-toggle button.active,
+.bu-buttons button,
+.bu-buttons button:hover,
+.bu-buttons button.selected {
+  color: #1F2A44 !important;
+}
